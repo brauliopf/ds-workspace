@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 
 import {
   Sidebar,
@@ -51,88 +52,89 @@ export function SidebarNav() {
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-        {workspaces.map((workspace) => ())}
-          <SidebarGroupLabel>workspace.name</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  isActive={pathname === "/"}
-                  onClick={() => toggleItem("playground")}
-                >
-                  <Home />
-                  <span>Playground</span>
-                  <ChevronRight
-                    className={
-                      playgroundOpen
-                        ? "ml-auto h-4 w-4 transition-transform rotate-90"
-                        : "ml-auto h-4 w-4 transition-transform"
-                    }
-                  />
-                </SidebarMenuButton>
-                {playgroundOpen && (
-                  <SidebarMenuSub>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton
-                        asChild
-                        isActive={pathname === "/history"}
-                      >
-                        <Link href="/history">
-                          <span>History</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton
-                        asChild
-                        isActive={pathname === "/starred"}
-                      >
-                        <Link href="/starred">
-                          <span>Starred</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                    <SidebarMenuSubItem>
-                      <SidebarMenuSubButton
-                        asChild
-                        isActive={pathname === "/settings-playground"}
-                      >
-                        <Link href="/settings-playground">
-                          <span>Settings</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  </SidebarMenuSub>
-                )}
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/models">
-                    <Laptop />
-                    <span>Models</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/docs">
-                    <FileText />
-                    <span>Documentation</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/settings">
-                    <Settings />
-                    <span>Settings</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {workspaces.map((workspace) => (
+          <SidebarGroup key={workspace.id}>
+            <SidebarGroupLabel>{workspace.name}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    isActive={pathname === "/"}
+                    onClick={() => toggleItem("playground")}
+                  >
+                    <Home />
+                    <span>Playground</span>
+                    <ChevronRight
+                      className={
+                        playgroundOpen
+                          ? "ml-auto h-4 w-4 transition-transform rotate-90"
+                          : "ml-auto h-4 w-4 transition-transform"
+                      }
+                    />
+                  </SidebarMenuButton>
+                  {playgroundOpen && (
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          asChild
+                          isActive={pathname === "/history"}
+                        >
+                          <Link href="/history">
+                            <span>History</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          asChild
+                          isActive={pathname === "/starred"}
+                        >
+                          <Link href="/starred">
+                            <span>Starred</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          asChild
+                          isActive={pathname === "/settings-playground"}
+                        >
+                          <Link href="/settings-playground">
+                            <span>Settings</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  )}
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link href="/models">
+                      <Laptop />
+                      <span>Models</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link href="/docs">
+                      <FileText />
+                      <span>Documentation</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <Link href="/settings">
+                      <Settings />
+                      <span>Settings</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
 
         <SidebarGroup>
           <SidebarGroupLabel>Projects</SidebarGroupLabel>
@@ -197,14 +199,22 @@ export function SidebarNav() {
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
-        <div className="mt-4 flex items-center gap-2 p-2">
-          <div className="bg-muted flex h-9 w-9 items-center justify-center rounded-full">
-            <User className="h-5 w-5" />
-          </div>
-          <div className="flex flex-col">
-            <p className="text-sm font-medium">shadcnm@example.com</p>
-          </div>
-        </div>
+        <SidebarSeparator />
+        <SignedIn>
+          <UserButton />
+        </SignedIn>
+        <SignedOut>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SignInButton mode="modal">
+                <SidebarMenuButton>
+                  <User />
+                  <span>Sign in</span>
+                </SidebarMenuButton>
+              </SignInButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SignedOut>
       </SidebarFooter>
     </Sidebar>
   );

@@ -21,10 +21,7 @@ export const useSidebarStore = create<SidebarState>()(
       expandedItems: {
         playground: false,
       },
-      workspaces: [
-        { id: "default", name: "Default Workspace" },
-        { id: "analytics", name: "Analytics" },
-      ],
+      workspaces: [{ id: "default", name: "Default Workspace" }],
       toggleItem: (itemId: string) =>
         set((state) => ({
           expandedItems: {
