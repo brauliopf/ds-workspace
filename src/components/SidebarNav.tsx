@@ -1,24 +1,18 @@
 "use client";
 
-import * as React from "react";
 import {
   Home,
   Settings,
   User,
-  LayoutDashboard,
   FileText,
-  PlusCircle,
   Laptop,
-  BarChart,
-  Plane,
   BellRing,
-  MessageCircle,
-  MoreHorizontal,
   ChevronRight,
+  ChevronDown,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import * as React from "react";
 
 import {
   Sidebar,
@@ -32,16 +26,40 @@ import {
   SidebarMenuSubItem,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarGroupContent,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
-import { useSidebarStore } from "@/stores/sidebar/store";
+import { useWorkspaceStore } from "@/stores/workspaces";
 
 export function SidebarNav() {
-  const pathname = usePathname();
-  const { toggleItem, isExpanded, workspaces } = useSidebarStore();
-  const playgroundOpen = isExpanded("playground");
+  const { workspaces } = useWorkspaceStore();
+
+  // Define the type for openGroups
+  const [openGroups, setOpenGroups] = React.useState<Record<string, boolean>>(
+    {}
+  );
+
+  React.useEffect(() => {
+    // Check if window is defined to ensure we're in the browser
+    if (typeof window !== "undefined") {
+      const savedState = localStorage.getItem("sidebarGroupsOpen");
+      setOpenGroups(savedState ? JSON.parse(savedState) : {});
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("sidebarGroupsOpen", JSON.stringify(openGroups));
+    }
+  }, [openGroups]);
+
+  // Update state
+  const toggleGroupOpen = (groupId: string) => {
+    setOpenGroups((prev) => ({
+      ...prev,
+      [groupId]: !prev[groupId],
+    }));
+  };
 
   return (
     <Sidebar variant="inset" collapsible="none">
@@ -51,33 +69,32 @@ export function SidebarNav() {
           <p className="text-sm opacity-75">Vibe Business Intelligence</p>
         </div>
       </SidebarHeader>
+
       <SidebarContent>
         {workspaces.map((workspace) => (
           <SidebarGroup key={workspace.id}>
-            <SidebarGroupLabel>{workspace.name}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton
-                    isActive={pathname === "/"}
-                    onClick={() => toggleItem("playground")}
+                    onClick={() => {
+                      toggleGroupOpen(workspace.id);
+                    }}
                   >
                     <Home />
                     <span>Playground</span>
-                    <ChevronRight
-                      className={
-                        playgroundOpen
-                          ? "ml-auto h-4 w-4 transition-transform rotate-90"
-                          : "ml-auto h-4 w-4 transition-transform"
-                      }
-                    />
+                    {openGroups[workspace.id] ? (
+                      <ChevronDown className="ml-auto h-4 w-4 transition-transform" />
+                    ) : (
+                      <ChevronRight className="ml-auto h-4 w-4 transition-transform" />
+                    )}
                   </SidebarMenuButton>
-                  {playgroundOpen && (
+                  {openGroups[workspace.id] && (
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton
                           asChild
-                          isActive={pathname === "/history"}
+                          // isActive={pathname === "/history"}
                         >
                           <Link href="/history">
                             <span>History</span>
@@ -87,7 +104,7 @@ export function SidebarNav() {
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton
                           asChild
-                          isActive={pathname === "/starred"}
+                          // isActive={pathname === "/starred"}
                         >
                           <Link href="/starred">
                             <span>Starred</span>
@@ -97,7 +114,7 @@ export function SidebarNav() {
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton
                           asChild
-                          isActive={pathname === "/settings-playground"}
+                          // isActive={pathname === "/settings-playground"}
                         >
                           <Link href="/settings-playground">
                             <span>Settings</span>
@@ -135,61 +152,11 @@ export function SidebarNav() {
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Projects</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/design">
-                    <LayoutDashboard />
-                    <span>Design Engineering</span>
-                    <MoreHorizontal className="ml-auto h-4 w-4 text-muted-foreground" />
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/sales">
-                    <BarChart />
-                    <span>Sales & Marketing</span>
-                    <MoreHorizontal className="ml-auto h-4 w-4 text-muted-foreground" />
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/travel">
-                    <Plane />
-                    <span>Travel</span>
-                    <MoreHorizontal className="ml-auto h-4 w-4 text-muted-foreground" />
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/more-projects">
-                    <PlusCircle />
-                    <span>More</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
       </SidebarContent>
+
       <SidebarSeparator />
       <SidebarFooter className="px-2">
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link href="/support">
-                <MessageCircle />
-                <span>Support</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <Link href="/feedback">
