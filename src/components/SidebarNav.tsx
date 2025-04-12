@@ -1,5 +1,6 @@
 "use client";
 
+import { useUser } from "@clerk/nextjs";
 import {
   User,
   FileText,
@@ -8,11 +9,19 @@ import {
   ChevronDown,
   Database,
   MessagesSquare,
-  FilePenLine,
+  Plus,
 } from "lucide-react";
 import Link from "next/link";
 import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import * as React from "react";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 import {
   Sidebar,
@@ -30,9 +39,34 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { useWorkspaceStore } from "@/stores/workspaces";
+import { createWorkspace } from "@/app/actions/workspaces/createWorkspace";
+import { useState } from "react";
 
 export function SidebarNav() {
+  const { user } = useUser();
+
   const { workspaces } = useWorkspaceStore();
+
+  const userId = user?.id || "";
+
+  const [loading, setLoading] = useState(false);
+
+  const handleCreateWorkspace = async (formData: FormData) => {
+    setLoading(true);
+    try {
+      // Call the server action
+      const newWorkspace = await createWorkspace(userId, formData);
+      // Update the state with the actual workspace data from the server
+      // Assuming you're using a state management library like useState
+      // If not, you might want to use a state management library to update the workspaces state
+      // For example, if you're using a state management library like Redux, you can dispatch an action
+      // to update the workspaces state
+    } catch (error) {
+      console.error("Error creating workspace:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Define the type for openGroups
   const [openGroups, setOpenGroups] = React.useState<Record<string, boolean>>(
@@ -65,13 +99,67 @@ export function SidebarNav() {
     <Sidebar variant="inset" collapsible="none">
       <SidebarHeader className="flex flex-col gap-2 px-2">
         <div>
-          <h1 className="text-xl font-bold">DS Workspace</h1>
+          <h1 className="text-2xl font-bold">DS Workspace</h1>
           <p className="text-sm opacity-75">Vibe Business Intelligence</p>
         </div>
       </SidebarHeader>
       <SidebarSeparator />
 
       <SidebarContent>
+        <div className="flex flex-row gap-4 items-center px-2 py-4">
+          <h2 className="text-xl font-bold">Workspaces</h2>
+          <Dialog>
+            <DialogTrigger>
+              <Plus className="h-6 w-6 cursor-pointer border border-gray-400 rounded-md text-gray-600" />
+            </DialogTrigger>
+            <DialogContent>
+              <SignedIn>
+                <DialogHeader>
+                  <DialogTitle>Add new workspace</DialogTitle>
+                  <DialogDescription>
+                    Begin a new exploration with a new data source.
+                  </DialogDescription>
+                  <form
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      const formData = new FormData(event.currentTarget);
+                      handleCreateWorkspace(formData);
+                    }}
+                  >
+                    <div className="flex flex-col gap-2">
+                      <label htmlFor="name">Workspace name</label>
+                      <input
+                        type="text"
+                        name="name"
+                        className="border border-gray-400 rounded-md p-2"
+                        placeholder="Workspace name"
+                      />
+                      <label htmlFor="dataset_id">Dataset ID</label>
+                      <input
+                        type="text"
+                        name="dataset_id"
+                        className="border border-gray-400 rounded-md p-2"
+                        placeholder="Dataset ID"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="bg-blue-500 text-white rounded-md justify-center items-center w-full p-2 my-4"
+                    >
+                      Create
+                    </button>
+                    {loading && <p>Loading...</p>}
+                  </form>
+                </DialogHeader>
+              </SignedIn>
+              <SignedOut>
+                <DialogHeader>
+                  <DialogTitle>Login to create a workspace</DialogTitle>
+                </DialogHeader>
+              </SignedOut>
+            </DialogContent>
+          </Dialog>
+        </div>
         {workspaces.map((workspace) => (
           <SidebarGroup key={workspace.id}>
             <SidebarGroupContent>
@@ -99,14 +187,6 @@ export function SidebarNav() {
                           <Link href={`/${workspace.id}/data_sources`}>
                             <Database />
                             <span>Data Sources</span>
-                          </Link>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton asChild>
-                          <Link href={`/${workspace.id}/instructions`}>
-                            <FilePenLine />
-                            <span>Instructions</span>
                           </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
