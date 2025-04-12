@@ -1,14 +1,14 @@
 "use client";
 
 import {
-  Home,
-  Settings,
   User,
   FileText,
-  Laptop,
   BellRing,
   ChevronRight,
   ChevronDown,
+  Database,
+  MessagesSquare,
+  FilePenLine,
 } from "lucide-react";
 import Link from "next/link";
 import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
@@ -69,6 +69,7 @@ export function SidebarNav() {
           <p className="text-sm opacity-75">Vibe Business Intelligence</p>
         </div>
       </SidebarHeader>
+      <SidebarSeparator />
 
       <SidebarContent>
         {workspaces.map((workspace) => (
@@ -77,76 +78,56 @@ export function SidebarNav() {
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton
+                    className=""
                     onClick={() => {
                       toggleGroupOpen(workspace.id);
                     }}
                   >
-                    <Home />
-                    <span>Playground</span>
+                    <span className="flex-grow font-bold text-lg uppercase">
+                      {workspace.name}
+                    </span>
                     {openGroups[workspace.id] ? (
-                      <ChevronDown className="ml-auto h-4 w-4 transition-transform" />
+                      <ChevronDown className="" />
                     ) : (
-                      <ChevronRight className="ml-auto h-4 w-4 transition-transform" />
+                      <ChevronRight className="" />
                     )}
                   </SidebarMenuButton>
                   {openGroups[workspace.id] && (
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
-                        <SidebarMenuSubButton
-                          asChild
-                          // isActive={pathname === "/history"}
-                        >
-                          <Link href="/history">
-                            <span>History</span>
+                        <SidebarMenuSubButton asChild>
+                          <Link href={`/${workspace.id}/data_sources`}>
+                            <Database />
+                            <span>Data Sources</span>
                           </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
-                        <SidebarMenuSubButton
-                          asChild
-                          // isActive={pathname === "/starred"}
-                        >
-                          <Link href="/starred">
-                            <span>Starred</span>
+                        <SidebarMenuSubButton asChild>
+                          <Link href={`/${workspace.id}/instructions`}>
+                            <FilePenLine />
+                            <span>Instructions</span>
                           </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
-                        <SidebarMenuSubButton
-                          asChild
-                          // isActive={pathname === "/settings-playground"}
-                        >
-                          <Link href="/settings-playground">
-                            <span>Settings</span>
+                        <SidebarMenuSubButton asChild>
+                          <Link href={`/${workspace.id}/queries`}>
+                            <FileText />
+                            <span>Queries</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild>
+                          <Link href={`/${workspace.id}/chats`}>
+                            <MessagesSquare />
+                            <span>Chats</span>
                           </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                     </SidebarMenuSub>
                   )}
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <Link href="/models">
-                      <Laptop />
-                      <span>Models</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <Link href="/docs">
-                      <FileText />
-                      <span>Documentation</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <Link href="/settings">
-                      <Settings />
-                      <span>Settings</span>
-                    </Link>
-                  </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
@@ -154,7 +135,6 @@ export function SidebarNav() {
         ))}
       </SidebarContent>
 
-      <SidebarSeparator />
       <SidebarFooter className="px-2">
         <SidebarMenu>
           <SidebarMenuItem>
